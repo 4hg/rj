@@ -4,8 +4,10 @@ require_relative 'jfi.rb'
 class RJ
   include Glimmer
 
+  attr_accessor :input, :output
+  
   def initialize
-    @@J = JFI.new(find_bin)
+    @J = JFI.new(find_bin)
     create_gui
   end
 
@@ -17,6 +19,11 @@ class RJ
         stretchy false
 
         on_clicked do
+          @input.lines(chomp: true).each do |s|
+            r = @J.run(s)
+            puts r unless r.empty?
+            break unless r !~ /\|/
+          end
         end
       }
 
@@ -52,7 +59,9 @@ class RJ
 
         horizontal_box {
           vertical_box {
-            non_wrapping_multiline_entry
+            non_wrapping_multiline_entry {
+              text <=> [self, :input]
+            }
           }
 
           vertical_box {
