@@ -4,7 +4,7 @@ require_relative 'jfi.rb'
 class RJ
   include Glimmer
 
-  attr_accessor :input, :output
+  attr_accessor :input
   
   def initialize
     @J = JFI.new(find_bin)
@@ -15,15 +15,19 @@ class RJ
     horizontal_box {
       stretchy false
 
-      button('eval') {
+      @run_button = button('eval') {
         stretchy false
 
         on_clicked do
+          @run_button.enabled = false
+          output = ''
           @input.lines(chomp: true).each do |s|
             r = @J.run(s)
-            puts r unless r.empty?
+            output << r unless r.empty?
             break unless r !~ /\|/
           end
+          @run_button.enabled = true
+          @output_box.text = output
         end
       }
 
@@ -65,7 +69,7 @@ class RJ
           }
 
           vertical_box {
-            multiline_entry {
+            @output_box = non_wrapping_multiline_entry {
               read_only true
             }
           }
